@@ -1,28 +1,19 @@
-var text = "{a{1}b}"
-var tag = /\{|\}/g
+'use strict';
 
-function handler(openTag, content, closeTag) {
-	console.log(openTag, content, closeTag)
-	return content
-}
-
-function isTag (c) {
-	return isOpenTag(c) || isCloseTag(c)
-}
-function isOpenTag (c) {
-	return c == '{'
-}
-function isCloseTag (c) {
-	return c == '}'
-}
-function isEmpty (stack) {
-	return !stack.length
-}
-function stackTop (stack) {
+/**
+ * Get top item of the stack
+ * @param  {Array} stack  stack
+ */
+function _stackTop (stack) {
 	return stack[stack.length - 1]
 }
-
-function join(arr1, arr2) {
+/**
+ * join arr2's items to arr
+ * @param  {Array} arr1  odd number index items
+ * @param  {Array} arr2  even number index items
+ * @return {Array}       new array with join result
+ */
+function _join(arr1, arr2) {
 	var len = arr1.length > arr2 ? arr1.length : arr2.length
 	var joinedArr = []
 	while(len --) {
@@ -32,28 +23,55 @@ function join(arr1, arr2) {
 	// merge remains
 	return joinedArr.concat(arr1).concat(arr2)
 }
-
-var stack = []
-function calc(c) {
-	if (isTag(c)) {
-		if (isOpenTag(c)) {
+/**
+ * handle block template syntax
+ * @param  {String}  text        Template string
+ * @param  {RegExp}  operatorReg Tag match regexp
+ * @param  {Function} isOpen     Function return true if the part is a open tag
+ * @param  {Function}  handler   Block content handler
+ * @return {string}              Parsed content
+ */
+module.exports = function (text, operatorReg, isSelfCloseTag, isOpen, handler) {
+	var tokens = _join(text.split(operatorReg), text.match(operatorReg))
+	var stack = []
+	function _isOperator (token) {
+		return !!(token && token.match(operatorReg))
+	}
+	function process(c) {
+		if (_isOperator(c)) {
+			if (isSelfCloseTag(c)) {
+				c = '' + handler({
+					type: 'close',
+					tag: c
+				})
+			} else if (isOpen(c)) {
+				stack.push(c)
+				return
+			} else {
+				// pop conent
+				var v = stack.pop()
+				// pop open tag
+				var o = stack.pop()
+				// only open tag push to stack
+				if (!_isOperator(o)) throw new Error('Unmatch token "' + c + '"')
+				// handler content
+				c = '' + handler({
+					type: 'block',
+					open: o,
+					content: v, 
+					close: c
+				})
+			}
+		}
+		var topItem = _stackTop(stack)
+		if ( _isOperator(topItem) && isOpen(topItem)) {
 			stack.push(c)
-			return
 		} else {
-			// pop open tag
-			var v = stack.pop()
-			var o = stack.pop()
-			if (!isOpenTag(o)) throw new Error('Unmatch token "' + c + '"')
-			// passing result to word flow
-			c = '' + handler(o, v, c)
+			// merge result
+			stack.push((stack.pop() || '' ) + '' + c)
 		}
 	}
-	if (isOpenTag(stackTop(stack))) {
-		stack.push(c)
-	} else {
-		// merge result
-		stack.push((stack.pop() || '' ) + '' + c)
-	}
+	tokens.forEach(process)
+
+	return stack.join('')
 }
-var tokens = join(text.split(tag), text.match(tag))
-tokens.forEach(calc)
