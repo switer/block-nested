@@ -1,12 +1,13 @@
-var text = "{a{1}a}"
+var text = "{a{1}b}"
 var tag = /\{|\}/g
 
 function handler(openTag, content, closeTag) {
+	console.log(openTag, content, closeTag)
 	return content
 }
 
 function isTag (c) {
-	return isOpenTag(c) || isCloseTag()
+	return isOpenTag(c) || isCloseTag(c)
 }
 function isOpenTag (c) {
 	return c == '{'
@@ -29,33 +30,30 @@ function join(arr1, arr2) {
 		joinedArr.push(arr2.shift())
 	}
 	// merge remains
-	return joinedArr.concat(arr1, text.match(tag))
+	return joinedArr.concat(arr1).concat(arr2)
 }
 
-var searches = join(text.split(tag), tokens)
-var wstacks = []
-var tstacks = []
-
-for (var i=0; i<searches.length; i++) {
-	var c = searches[i]
+var stack = []
+function calc(c) {
 	if (isTag(c)) {
 		if (isOpenTag(c)) {
-			tstacks.push(c)
+			stack.push(c)
+			return
 		} else {
-			// handle close tag
-
 			// pop open tag
-			var oc = tstacks.pop()
-
-			if (!oc) return throw new Error('Unmatch token', c)
-
-			var w = wstacks.pop() || ''
-			// left value
-			var lw = wstacks.pop() || ''
-			wstacks.push((lw + handler(c, w, oc)) + '')
+			var v = stack.pop()
+			var o = stack.pop()
+			if (!isOpenTag(o)) throw new Error('Unmatch token "' + c + '"')
+			// passing result to word flow
+			c = '' + handler(o, v, c)
 		}
+	}
+	if (isOpenTag(stackTop(stack))) {
+		stack.push(c)
 	} else {
-		wstacks.push(c)
-		tstacks.push('+')
+		// merge result
+		stack.push((stack.pop() || '' ) + '' + c)
 	}
 }
+var tokens = join(text.split(tag), text.match(tag))
+tokens.forEach(calc)
