@@ -27,11 +27,14 @@ var parser = require('../index')(
 
 describe('#self-close tag', function () {
 	var specs = [{
-		i: '{% abc /%}',
+		i: '{%abc/%}',
 		o: '<component />'
 	}, {
-		i: 'a{% b /%}c',
+		i: 'a{%b/%}c',
 		o: 'a<component />c'
+	}, {
+		i: '{%a/%}{% b /%}{%c/%}',
+		o: '<component /><component /><component />'
 	}]
 	specs.forEach(function (spec) {
 		it('"%s" => "%s"'.replace('%s', spec.i).replace('%s', spec.o), function () {
