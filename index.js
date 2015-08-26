@@ -31,47 +31,48 @@ function _join(arr1, arr2) {
  * @param  {Function}  handler   Block content handler
  * @return {string}              Parsed content
  */
-module.exports = function (text, operatorReg, isSelfCloseTag, isOpen, handler) {
-	var tokens = _join(text.split(operatorReg), text.match(operatorReg))
-	var stack = []
+module.exports = function (operatorReg, isSelfCloseTag, isOpen, handler) {
 	function _isOperator (token) {
 		return !!(token && token.match(operatorReg))
 	}
-	function process(c) {
-		if (_isOperator(c)) {
-			if (isSelfCloseTag(c)) {
-				c = '' + handler({
-					type: 'close',
-					tag: c
-				})
-			} else if (isOpen(c)) {
+	return function (text) {
+		var tokens = _join(text.split(operatorReg), text.match(operatorReg))
+		var stack = []
+		function process(c) {
+			if (_isOperator(c)) {
+				if (isSelfCloseTag(c)) {
+					c = handler({
+						type: 'close',
+						tag: c
+					})
+				} else if (isOpen(c)) {
+					stack.push(c)
+					return
+				} else {
+					// pop conent
+					var v = stack.pop()
+					// pop open tag
+					var o = stack.pop()
+					// only open tag push to stack
+					if (!_isOperator(o)) throw new Error('Unmatch token "' + c + '"')
+					// handler content
+					c = handler({
+						type: 'block',
+						open: o,
+						content: v, 
+						close: c
+					})
+				}
+			}
+			var topItem = _stackTop(stack)
+			if ( _isOperator(topItem) && isOpen(topItem)) {
 				stack.push(c)
-				return
 			} else {
-				// pop conent
-				var v = stack.pop()
-				// pop open tag
-				var o = stack.pop()
-				// only open tag push to stack
-				if (!_isOperator(o)) throw new Error('Unmatch token "' + c + '"')
-				// handler content
-				c = '' + handler({
-					type: 'block',
-					open: o,
-					content: v, 
-					close: c
-				})
+				// merge result
+				stack.push((stack.pop() || '') + '' + c)
 			}
 		}
-		var topItem = _stackTop(stack)
-		if ( _isOperator(topItem) && isOpen(topItem)) {
-			stack.push(c)
-		} else {
-			// merge result
-			stack.push((stack.pop() || '' ) + '' + c)
-		}
+		tokens.forEach(process)
+		return stack.join('')
 	}
-	tokens.forEach(process)
-
-	return stack.join('')
 }

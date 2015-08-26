@@ -1,11 +1,9 @@
 'use strict';
 
-var parser = require('../index')
+var assert = require("assert")
 var SELF_CLOSE_REG = /\{%[\s\S]+?\/%\}/
 var CLOSE_REG = /\{%\/[\s\S]+?%\}/
-
-var result = parser(
-	'{% if %} {% abc /%} {%/ if %}',
+var parser = require('../index')(
 	/\{%[\s\S]+?%\}/g,
 	// first match self-close tag
 	// this judge condition is base on the condition of operator match
@@ -26,4 +24,19 @@ var result = parser(
 		}
 	}
 )
-console.log(result)
+
+describe('#self-close tag', function () {
+	var specs = [{
+		i: '{% abc /%}',
+		o: '<component />'
+	}, {
+		i: 'a{% b /%}c',
+		o: 'a<component />c'
+	}]
+	specs.forEach(function (spec) {
+		it('"%s" => "%s"'.replace('%s', spec.i).replace('%s', spec.o), function () {
+			var result = parser(spec.i)
+			assert.equal(result, spec.o)
+		})
+	})
+})

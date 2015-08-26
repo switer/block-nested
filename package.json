@@ -3,11 +3,8 @@
   "version": "1.0.0",
   "description": "Template block nested syntax parser.",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "node test/index"
+    "test": "mocha test/index.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/switer/block-nested/issues"
   },
-  "homepage": "https://github.com/switer/block-nested"
+  "homepage": "https://github.com/switer/block-nested",
+  "devDependencies": {
+    "mocha": "^2.2.5"
+  }
 }
