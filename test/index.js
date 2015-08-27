@@ -25,6 +25,15 @@ var parser = require('../index')(
 	}
 )
 
+var MAX_LENGTH = 35
+function genDesc (spec) {
+	var i = spec.i.length > MAX_LENGTH ? spec.i.slice(0, MAX_LENGTH) + '...' : spec.i
+	var o = spec.o.length > MAX_LENGTH ? spec.o.slice(0, MAX_LENGTH) + '...' : spec.o
+	return '"%s" => "%s"'
+				.replace('%s', i)
+				.replace('%s', o)
+}
+
 describe('#self-close tag', function () {
 	var specs = [{
 		i: '{%abc/%}',
@@ -37,7 +46,7 @@ describe('#self-close tag', function () {
 		o: '<component /><component /><component />'
 	}]
 	specs.forEach(function (spec) {
-		it('"%s" => "%s"'.replace('%s', spec.i).replace('%s', spec.o), function () {
+		it(genDesc(spec), function () {
 			var result = parser(spec.i)
 			assert.equal(result, spec.o)
 		})
