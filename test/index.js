@@ -25,7 +25,7 @@ var parser = require('../index')(
 	}
 )
 
-var MAX_LENGTH = 35
+var MAX_LENGTH = 30
 function genDesc (spec) {
 	var i = spec.i.length > MAX_LENGTH ? spec.i.slice(0, MAX_LENGTH) + '...' : spec.i
 	var o = spec.o.length > MAX_LENGTH ? spec.o.slice(0, MAX_LENGTH) + '...' : spec.o
@@ -44,6 +44,24 @@ describe('#self-close tag', function () {
 	}, {
 		i: '{%a/%}{% b /%}{%c/%}',
 		o: '<component /><component /><component />'
+	}]
+	specs.forEach(function (spec) {
+		it(genDesc(spec), function () {
+			var result = parser(spec.i)
+			assert.equal(result, spec.o)
+		})
+	})
+})
+describe('#block tag', function () {
+	var specs = [{
+		i: '{%a%}{%/a%}',
+		o: '<component-block></component-block>'
+	}, {
+		i: 'a{%a%}b{%/a%}c',
+		o: 'a<component-block>b</component-block>c'
+	}, {
+		i: '{%a%}{%a%}{%/a%}{%a%}{%/a%}{%/a%}',
+		o: '<component-block><component-block></component-block><component-block></component-block></component-block>'
 	}]
 	specs.forEach(function (spec) {
 		it(genDesc(spec), function () {
