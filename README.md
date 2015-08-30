@@ -1,5 +1,6 @@
 # block-nested
-[travis-ci](https://travis-ci.org/switer/block-nested.svg)
+![travis-ci](https://travis-ci.org/switer/block-nested.svg)
+
 Block nested template syntax.
 
 # Usage
