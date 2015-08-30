@@ -70,3 +70,26 @@ describe('#block tag', function () {
 		})
 	})
 })
+describe('#Hybrid', function () {
+	var specs = [{
+		i: '{%a%}{%b/%}{%/a%}',
+		o: '<component-block><component /></component-block>'
+	}, {
+		i: '{%a%}{%b/%}{%b/%}{%/a%}',
+		o: '<component-block><component /><component /></component-block>'
+	}, {
+		i: '{%b/%}{%a%}{%b/%}{%/a%}{%b/%}',
+		o: '<component /><component-block><component /></component-block><component />'
+	}, {
+		i: '{%a%}{%a%}{%b/%}{%/a%}{%/a%}',
+		o: '<component-block><component-block><component /></component-block></component-block>'
+	}]
+	specs.forEach(function (spec) {
+		it(genDesc(spec), function () {
+			var result = parser(spec.i)
+			assert.equal(result, spec.o)
+		})
+	})
+})
+
+
