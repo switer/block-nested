@@ -70,8 +70,8 @@ describe('#block tag', function () {
 		})
 	})
 })
-describe('#Hybrid', function () {
-	var specs = [{
+
+var hybridSpecs = [{
 		i: '{%a%}{%b/%}{%/a%}',
 		o: '<component-block><component /></component-block>'
 	}, {
@@ -84,7 +84,8 @@ describe('#Hybrid', function () {
 		i: '{%a%}{%a%}{%b/%}{%/a%}{%/a%}',
 		o: '<component-block><component-block><component /></component-block></component-block>'
 	}]
-	specs.forEach(function (spec) {
+describe('#Hybrid', function () {
+	hybridSpecs.forEach(function (spec) {
 		it(genDesc(spec), function () {
 			var result = parser(spec.i)
 			assert.equal(result, spec.o)
