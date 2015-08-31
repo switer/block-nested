@@ -26,18 +26,25 @@ function _join(arr1, arr2) {
 /**
  * handle block template syntax
  * @param  {String}  text        Template string
- * @param  {RegExp}  operatorReg Tag match regexp
+ * @param  {RegExp}  operator Tag match regexp
  * @param  {Function} isOpen     Function return true if the part is a open tag
  * @param  {Function}  handler   Block content handler
  * @return {string}              Parsed content
  */
-module.exports = function (operatorReg, isSelfCloseTag, isOpen, handler) {
+module.exports = function (operator, isSelfCloseTag, isOpen, handler) {
+	function _opertor () {
+		return typeof operator == 'function' 
+			? operator() 
+			: operator
+	}
 	function _isOperator (token) {
-		return !!(token && token.match(operatorReg))
+		return !!(token && token.match(_opertor()))
 	}
 	return function (text) {
-		var tokens = _join(text.split(operatorReg), text.match(operatorReg))
+		var opr = _opertor()
+		var tokens = _join(text.split(opr), text.match(opr))
 		var stack = []
+
 		function process(c) {
 			if (_isOperator(c)) {
 				if (isSelfCloseTag(c)) {

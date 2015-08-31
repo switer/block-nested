@@ -4,7 +4,9 @@ var assert = require("assert")
 var SELF_CLOSE_REG = /\{%[\s\S]+?\/%\}/
 var CLOSE_REG = /\{%\/[\s\S]+?%\}/
 var parser = require('../index')(
-	/\{%[\s\S]+?%\}/g,
+	function operator () {
+		return /\{%[\s\S]+?%\}/g
+	},
 	// first match self-close tag
 	// this judge condition is base on the condition of operator match
 	function isSelfCloseTag (c) {
